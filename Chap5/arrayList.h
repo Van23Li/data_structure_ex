@@ -31,6 +31,14 @@ class arrayList : public linearList <T>{
 
         // 其他方法
         int capacity() const {return arrayLength;}
+        void trimToSize();
+        T& operator[](int theIndex);
+        bool operator != (const arrayList<T>& theList);
+        bool operator == (const arrayList<T>& theList);
+        void swapl(arrayList <T> & theList);
+        void set(int theIndex, const T & theElement);
+        void removeRange(int startIndex, int endIndex);
+
 
     protected:
         void checkIndex (int theIndex) const;   // 若索引theIndex无效，则抛出异常；
@@ -125,5 +133,76 @@ void arrayList <T> ::output(ostream& out) const{
 template <class T>
 ostream& operator<<(ostream& out, const arrayList<T>& x)
    {x.output(out); return out;}
+
+// overload []
+template <class T>
+T& arrayList<T>::operator[](int theIndex){
+    checkIndex (theIndex);
+    return element[theIndex];
+}
+
+// overload ==
+template <class T>
+bool arrayList<T>::operator ==(const arrayList <T> & theList){
+    return !(*this != theList);
+}
+
+// overload !=
+template <class T>
+bool arrayList<T>::operator !=(const arrayList <T> & theList){
+    if (listSize != theList.size()) return true;
+    
+    for (int i = 0; i < listSize; i++){
+        if (element[i] != theList.element[i])
+            return true;
+    }
+
+    return false;
+}
+
+// 交换
+template <class T>
+void arrayList<T>::swapl(arrayList <T> & theList){
+    // T* temp = new T [arrayLength];
+    // copy (element, element + listSize, temp);
+    // // delete [] element;
+    // copy (theList.element, theList.element + theList.listSize, element);
+    // // delete [] theList.element;
+    // copy (temp, temp + listSize, theList.element);
+    swap(arrayLength, theList.arrayLength);
+    swap(listSize, theList.listSize);
+    swap(element, theList.element);
+}
+
+template <class T>
+void arrayList<T>::set(int theIndex, const T & theElement){
+    checkIndex(theIndex);
+    element[theIndex] = theElement;
+}
+
+template <class T>
+void arrayList<T>::removeRange(int startIndex, int endIndex){
+    if (startIndex < 0 || endIndex > listSize)
+      throw illegalIndex();
+
+   if (startIndex >= endIndex)
+      // nothing to remove
+      return;
+
+
+    // shift elements with higher index
+    copy(element + endIndex, element + listSize, element + startIndex);
+
+    // destroy uneeded elements
+    int newSize = listSize - endIndex + startIndex;
+    for (int i = newSize; i < listSize; i++)
+        element[i].~T(); 
+
+    listSize = newSize;
+
+    // for (int i = startIndex; i < endIndex; i ++){
+    //     erase(i);
+    // }            错了，因为erase会同时改变数组长度
+}
 
 #endif
